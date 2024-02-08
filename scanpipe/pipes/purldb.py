@@ -359,7 +359,7 @@ def poll_until_success(run_url, sleep=10):
     Given a URL to a scancode.io run instance, `run_url`, return True when the
     run instance has completed successfully.
 
-    Raise a PurlDBException when the run instance has faield, stopped, or gone
+    Raise a PurlDBException when the run instance has failed, stopped, or gone
     stale.
     """
     run_status = AbstractTaskFieldsModel.Status
@@ -440,3 +440,37 @@ def create_packages_from_match_results(project, match_results):
             package_data=matched_package,
             status=flag.MATCHED_TO_PURLDB_PACKAGE,
         )
+
+
+def get_next_job(
+    timeout=DEFAULT_TIMEOUT, api_url=PURLDB_API_URL
+):
+    """
+    Return the download URL and Package UUID of the next Package to be scanned from PurlDB
+
+    Return None if no job is available
+    """
+    response = request_get(
+        url=f"{api_url}scan_queue/get_next_download_url",
+        timeout=timeout,
+    )
+    if response:
+        download_url = response['download_url']
+        package_uuid = response['package_uuid']
+        return download_url, package_uuid
+
+
+def send_results_to_purldb(
+    package_uuid, scan_output_location, timeout=DEFAULT_TIMEOUT, api_url=PURLDB_API_URL,
+):
+    with open(scan_output_location, "rb") as f:
+        data={
+            "package_uuid": package_uuid,
+            "scan_file": f,
+        }
+        response = request_post(
+            url=f"{api_url}scan_queue/submit_scan_results",
+            timeout=timeout,
+            data=data,
+        )
+    return response
