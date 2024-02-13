@@ -17,6 +17,9 @@ v33.2.0 (unreleased)
 
    https://github.com/nexB/scancode.io/issues/1071
 
+- Rename the ``match_to_purldb`` pipeline to ``match_to_matchcode``, and add
+  MatchCode.io API settings to ScanCode.io settings.
+
 v33.1.0 (2024-02-02)
 --------------------
 
